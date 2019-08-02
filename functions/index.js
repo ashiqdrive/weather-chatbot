@@ -1,33 +1,42 @@
 'use strict';
  
+//Firebase related imports
 const functions = require('firebase-functions');
 const {WebhookClient} = require('dialogflow-fulfillment');
 const {Card, Suggestion} = require('dialogflow-fulfillment');
-const admin = require('firebase-admin');
 
-var express = require('express')
-var cors = require('cors')
-var app = express()
+//Other Modules 
+const express = require('express')
+const axios = require('axios');
+const cors = require('cors')
+require('dotenv').config()
 
+//Custom Modules
+const getWeather = require('./getWeather.js');
 
-//MIDDELWARE Using Cross-origin resource sharing  
+const app = express()
+const WEATHER_API = process.env.WEATHER_API;
+
+//*MIDDELWARE* -- Cross-origin resource sharing  
 //app.use(cors())
 app.use(express.json());
 app.use(express.urlencoded({extended:false}))
 
-function welcome (agent) {
-  agent.add(`Welcome to Express.JS webhook!`);
-}
+// function welcome (agent) {
+//   agent.add(`Welcome to Express.JS webhook!`);
+// }
 
-function fallback (agent) {
-  agent.add(`I didn't understand`);
-  agent.add(`I'm sorry, can you try again?`);
-}
+// function fallback (agent) {
+//   agent.add(`I didn't understand`);
+//   agent.add(`I'm sorry, can you try again?`);
+// }
 
 function ask_weather (agent) {
-  let city_name = agent.parameters['city']
-  agent.add(`Your city name is ${city_name}`);
-  agent.add(`weather condition for ${city_name}`);
+  const city_name = agent.parameters['city']
+  const reply = getWeather(city_name)
+  agent.add(reply);
+  //agent.add(`weather condition for ${city_name}`);
+  // ** need to implement random responce **
 }
 
 function WebhookProcessing(req, res) {
@@ -35,10 +44,10 @@ function WebhookProcessing(req, res) {
   console.info(`agent set`);
 
   let intentMap = new Map();
-  intentMap.set('Default Welcome Intent', welcome);
-  intentMap.set('Default Fallback Intent', fallback);
+  //intentMap.set('Default Welcome Intent', welcome);
+  //intentMap.set('Default Fallback Intent', fallback);
   intentMap.set('ask_weather', ask_weather);
-// intentMap.set('<INTENT_NAME_HERE>', yourFunctionHandler);
+  //intentMap.set('<INTENT_NAME_HERE>', yourFunctionHandler);
   agent.handleRequest(intentMap);
 }
 
