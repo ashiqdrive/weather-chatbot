@@ -31,10 +31,10 @@ app.use(express.urlencoded({extended:false}))
 //   agent.add(`I'm sorry, can you try again?`);
 // }
 
-function ask_weather (agent) {
-  const city_name = agent.parameters['city']
-  const reply = getWeather(city_name)
-  agent.add(reply);
+async function ask_weather(agent) {
+  const city_name = agent.parameters['city'];
+  const reply = await getWeather(city_name);
+  agent.add(reply.toString());
   //agent.add(`weather condition for ${city_name}`);
   // ** need to implement random responce **
 }
@@ -50,7 +50,6 @@ function WebhookProcessing(req, res) {
   //intentMap.set('<INTENT_NAME_HERE>', yourFunctionHandler);
   agent.handleRequest(intentMap);
 }
-
 
 // Webhook
 app.post('/', (req, res) => {
